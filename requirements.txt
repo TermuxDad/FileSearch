@@ -1,3 +1,4 @@
+motor
 aiogram>=3.17.0,<4.0.0
 aiohttp>=3.11.0
 pydantic>=2.10.0
