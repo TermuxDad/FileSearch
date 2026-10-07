@@ -1,0 +1,29 @@
+services:
+  - type: web
+    name: zombie-survival-bot
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: python main.py
+    healthCheckPath: /health
+    envVars:
+      - key: BOT_TOKEN
+        sync: false
+      - key: API_ID
+        sync: false
+      - key: API_HASH
+        sync: false
+      - key: MONGO_URI
+        sync: false
+      - key: MONGO_DB
+        value: zombie_survival
+      - key: OWNER_IDS
+        sync: false
+      - key: BACKUP_CHAT_ID
+        sync: false
+      - key: BACKUP_INTERVAL_SECONDS
+        value: "900"
+      - key: BACKUP_KEEP
+        value: "12"
+      - key: AUTO_RESTORE
+        value: "true"
