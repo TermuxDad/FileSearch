@@ -10,6 +10,7 @@ MISSIONS = {
     "weekly_kill50": ("💀 Weekly: Kill 50 Zombies", "kills", "weekly", 50, 5000, 750),
     "weekly_coins25k": ("🪙 Weekly: Earn 25,000 Coins", "coins", "weekly", 25000, 7000, 1000),
     "weekly_raid3": ("☣️ Weekly: Join 3 Raids", "raids", "weekly", 3, 3500, 500),
+    "weekly_pvp5": ("⚔️ Weekly: Win 5 PvP Fights", "pvp_wins", "weekly", 5, 6000, 900),
 }
 
 def period_key(period):

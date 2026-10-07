@@ -8,16 +8,21 @@ from .raid import register as register_raid
 from .admin import register as register_admin
 from .backup import register as register_backup
 from .help_handler import register_help
+from .pvp import register as register_pvp
+from .social import register as register_social
+from .wanted import register as register_wanted
 
-
-def register_handlers(app, db, config):
-    register(app, db)
-    register_profile(app, db)
-    register_game(app, db)
-    register_shop(app, db)
-    register_missions(app, db)
-    register_leaderboard(app, db)
-    register_raid(app, db)
-    register_admin(app, db, config)
-    register_backup(app, db, config)
-    register_help(app, db)
+def register_handlers(app,db,config):
+    register(app,db)
+    register_profile(app,db)
+    register_game(app,db)
+    register_shop(app,db)
+    register_missions(app,db)
+    register_leaderboard(app,db)
+    register_raid(app,db)
+    register_pvp(app,db)
+    register_social(app,db)
+    register_wanted(app,db)
+    register_admin(app,db,config)
+    register_backup(app,db,config)
+    register_help(app,db)
