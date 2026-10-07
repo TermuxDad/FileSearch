@@ -132,6 +132,12 @@ class Database:
         cursor = self.db.stats.find({}).sort("value", -1)
         return {x["_id"]: x.get("value", 0) async for x in cursor}
 
+    async def count_users(self):
+        return await self.db.users.count_documents({})
+
+    async def count_groups(self):
+        return await self.db.groups.count_documents({})
+
     async def get_all_targets(self):
         users = await self.db.users.distinct("user_id")
         groups = await self.db.groups.distinct("chat_id")
