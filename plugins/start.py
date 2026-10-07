@@ -17,7 +17,7 @@ def kb():
         ],
     ])
 
-@Client.on_message(filters.command("start"))
+@Client.on_message(filters.text & filters.regex(r"^/start(?:@[A-Za-z0-9_]+)?(?:\s|$)"))
 async def start(client, message):
     if message.from_user:
         await client.db.register_user(message.from_user.id)
@@ -48,7 +48,7 @@ async def start_callbacks(client, query):
     await query.answer()
     await query.message.edit_text(text, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Bᴀᴄᴋ", callback_data="v_home", style=ButtonStyle.PRIMARY)]]))
 
-@Client.on_message(filters.command("help"))
+@Client.on_message(filters.text & filters.regex(r"^/help(?:@[A-Za-z0-9_]+)?(?:\s|$)"))
 async def help_command(client, message):
     text = (
         "<b>Hᴇʟᴘ Cᴇɴᴛᴇʀ</b>\n\n"
