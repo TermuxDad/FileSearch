@@ -1,93 +1,41 @@
-# 🧟 Zombie Survival RPG — V2 Apocalypse PvP
+# Veyro
 
-Telegram group + private RPG built with Python, Kurigram, MongoDB and Render.
+Veyro is a Telegram group-management bot built with Python 3, Kurigram/Pyrogram-compatible APIs and MongoDB.
 
-## V2 gameplay
+## Render Deployment
 
-- 🧟 20 zombie types, hunting and exploration
-- 🔫 30 weapons + 🛡️ 20 armor pieces
-- ⬆️ Real weapon/armor upgrades
-- 🎒 Inventory, medical items and economy
-- ⭐ XP, levels, missions and daily rewards
-- ⚔️ **Turn-based PvP duels** with Strike, Heavy, Defend, Dodge, Heal and Surrender
-- 📺 **Live group PvP:** one shared battle message updates every move, with a single rotating `YOUR TURN` alert and a live-battle jump button
-- ☠️ **Bounties / Most Wanted**
-- 🔥 PvP streaks, reputation and rivalries
-- 👑 **Clans** with members and clan bank
-- 🏰 **Territory capture**
-- ⚔️ **Clan wars** with attack buttons and victory rewards
-- 🌑 Rotating six-hour apocalypse events
-- ☣️ Group Horde raids with persistent state and restart recovery
-- 🏆 Global + group leaderboards
-- 🛡️ Owner/admin controls
-- 💾 MongoDB persistence
-- 🗄️ Telegram disaster-recovery backups including V2 collections
-- 🚀 Render health endpoint and deployment config
+Veyro is prepared as a Render Web Service. It binds to `0.0.0.0:$PORT` and exposes `/health`. The health endpoint checks MongoDB before returning healthy.
+
+### Build Command
+```bash
+pip install -r requirements.txt
+```
+
+### Start Command
+```bash
+python main.py
+```
+
+Set the required environment variables from `.env.example`. MongoDB must be external because a Render service filesystem is not a database.
 
 ## Commands
 
-- `/start` or `/menu` — main menu
-- `/help` — complete help
-- `/duel` — reply to a player to challenge them
-- `/bounty AMOUNT` — reply to a player to place a bounty
-- `/clan create NAME`
-- `/clan join CLAN_ID`
-- `/clan donate AMOUNT`
-- `/clan leave`
-- `/clanwar CLAN_ID`
-- `/clanwarattack`
-- `/raid` — group Horde raid
-- `/backup` — owner manual backup
-- `/backupstatus` — owner backup status
-- `/stats`, `/givecoins`, `/setlevel`, `/heal` — owner tools
+**Every Veyro command uses `/` only.** `.` and `!` prefixes are not supported, and `@admin` / `@all` are not command aliases.
 
-## Environment
+### Tagging
+`/gmtag` `/gntag` `/tagall` `/vctag` `/admin` `/all` `/stop` `/pause` `/resume`
 
-Required:
+### Moderation
+`/warn` `/unwarn` `/warns` `/mute` `/unmute` `/ban` `/unban` `/kick` `/dmute` `/smute` `/dban` `/sban` `/skick` `/pin` `/unpin` `/d`
 
-```text
-BOT_TOKEN=
-API_ID=
-API_HASH=
-MONGO_URI=
-```
+### Admin
+`/res` `/add` `/remove` `/promote` `/demote` `/demote_all` `/title`
 
-Optional:
+### Notes
+`/save` `/get` `/notes` `/delnote` `/clear_notes`
 
-```text
-MONGO_DB=zombie_survival
-OWNER_IDS=123456789
-BACKUP_CHAT_ID=-1001234567890
-BACKUP_INTERVAL_SECONDS=900
-BACKUP_KEEP=12
-AUTO_RESTORE=true
-```
+### Owner
+`/broadcast` `/stats` `/update`
 
-## Run
-
-```bash
-python -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-python main.py
-```
-
-## Render
-
-Build command:
-
-```text
-pip install -r requirements.txt
-```
-
-Start command:
-
-```text
-python main.py
-```
-
-The included `render.yaml` configures the web health endpoint.
-
-## Safety / game design
-
-PvP is fictional in-game combat. It uses bounded virtual coin/loot stakes only; there are no real-money wagers. The goal is high-stakes competition without making real-world harm or gambling part of the game.
+### Whisper
+Use Veyro inline as `@VeyroBot @username message`. Whisper text is limited to 180 characters so Telegram's callback alert can display it safely.
