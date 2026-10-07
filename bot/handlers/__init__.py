@@ -1,12 +1,14 @@
 from .start import register
 from .game import register as register_game
-from .profile import register_profile
-from .shop import register_shop
-from .missions import register_missions
-from .leaderboard import register_leaderboard
-from .raid import register_raid
-from .admin import register_admin
+from .profile import register as register_profile
+from .shop import register as register_shop
+from .missions import register as register_missions
+from .leaderboard import register as register_leaderboard
+from .raid import register as register_raid
+from .admin import register as register_admin
 from .backup import register as register_backup
+from .help_handler import register_help
+
 
 def register_handlers(app, db, config):
     register(app, db)
@@ -19,5 +21,3 @@ def register_handlers(app, db, config):
     register_admin(app, db, config)
     register_backup(app, db, config)
     register_help(app, db)
-
-from .help_handler import register_help
