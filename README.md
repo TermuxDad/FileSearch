@@ -1,83 +1,93 @@
-# 🧟 Zombie Survival — Telegram Game Bot V1
+# 🧟 Zombie Survival RPG — V2 Apocalypse PvP
 
-Python + Kurigram + MongoDB. Designed for Render Web Service deployment.
+Telegram group + private RPG built with Python, Kurigram, MongoDB and Render.
 
-## V1 Features
-- Player profile, XP, levels, HP and energy
-- Zombie hunting with turn-based combat
-- 20 zombie types
-- 30 weapons and 20 armor items, all accessible through paginated shop pages
-- Inventory and equipment
-- Shop and upgrades
-- Exploration across 8 locations
-- Random loot
-- Daily rewards
-- Daily/weekly missions
-- Global leaderboard
-- Group leaderboard
-- Multiplayer group Horde Raid
-- Admin controls
-- MongoDB persistence
-- Inline button UI with action emojis
+## V2 gameplay
 
-## Environment variables
-Copy `.env.example` to `.env` locally, or add the same variables in Render.
+- 🧟 20 zombie types, hunting and exploration
+- 🔫 30 weapons + 🛡️ 20 armor pieces
+- ⬆️ Real weapon/armor upgrades
+- 🎒 Inventory, medical items and economy
+- ⭐ XP, levels, missions and daily rewards
+- ⚔️ **Turn-based PvP duels** with Strike, Heavy, Defend, Dodge, Heal and Surrender
+- 📺 **Live group PvP:** one shared battle message updates every move, with a single rotating `YOUR TURN` alert and a live-battle jump button
+- ☠️ **Bounties / Most Wanted**
+- 🔥 PvP streaks, reputation and rivalries
+- 👑 **Clans** with members and clan bank
+- 🏰 **Territory capture**
+- ⚔️ **Clan wars** with attack buttons and victory rewards
+- 🌑 Rotating six-hour apocalypse events
+- ☣️ Group Horde raids with persistent state and restart recovery
+- 🏆 Global + group leaderboards
+- 🛡️ Owner/admin controls
+- 💾 MongoDB persistence
+- 🗄️ Telegram disaster-recovery backups including V2 collections
+- 🚀 Render health endpoint and deployment config
+
+## Commands
+
+- `/start` or `/menu` — main menu
+- `/help` — complete help
+- `/duel` — reply to a player to challenge them
+- `/bounty AMOUNT` — reply to a player to place a bounty
+- `/clan create NAME`
+- `/clan join CLAN_ID`
+- `/clan donate AMOUNT`
+- `/clan leave`
+- `/clanwar CLAN_ID`
+- `/clanwarattack`
+- `/raid` — group Horde raid
+- `/backup` — owner manual backup
+- `/backupstatus` — owner backup status
+- `/stats`, `/givecoins`, `/setlevel`, `/heal` — owner tools
+
+## Environment
 
 Required:
-BOT_TOKEN
-API_ID
-API_HASH
-MONGO_URI
+
+```text
+BOT_TOKEN=
+API_ID=
+API_HASH=
+MONGO_URI=
+```
 
 Optional:
-MONGO_DB (default: zombie_survival)
-OWNER_IDS (comma-separated Telegram numeric IDs)
 
-## Render
-Create a Web Service from this repository.
-Build:
-`pip install -r requirements.txt`
-Start:
-`python main.py`
+```text
+MONGO_DB=zombie_survival
+OWNER_IDS=123456789
+BACKUP_CHAT_ID=-1001234567890
+BACKUP_INTERVAL_SECONDS=900
+BACKUP_KEEP=12
+AUTO_RESTORE=true
+```
 
-The included `render.yaml` can be used as a Blueprint.
+## Run
 
-## Button styles
-The bot requests Telegram/Kurigram Primary, Success and Danger inline-button styles where the installed client/library supports them. It also keeps clear action emojis so the UI remains understandable on clients that render styles differently.
-
-## Local
 ```bash
 python -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
-cp .env.example .env
 python main.py
 ```
 
+## Render
 
-## Final V1 fixes
-- Native Telegram button styles: Primary (blue), Success (green), Danger (red), when supported by the installed Kurigram/Telegram client.
-- Combat state is persisted in MongoDB and survives bot restarts for up to 30 minutes.
-- Active raid timers are restored after bot restarts.
-- The 5,000 Coins mission now tracks real earned coins.
-- Raid and daily rewards update earned-coin progress.
-- Mission XP now uses the normal level-up system.
-- Group leaderboard is shown when the leaderboard is opened from a group.
-- `/help` command is available.
+Build command:
 
-## Disaster-recovery backups
-MongoDB remains the live database. The bot can periodically create a compact gzip snapshot and upload it to a private Telegram group/channel. The latest verified snapshot is automatically restored **only when all game collections are empty**, preventing accidental overwrites of live data.
+```text
+pip install -r requirements.txt
+```
 
-Required for backups:
-- `BACKUP_CHAT_ID`: private group/channel ID where the bot can send documents
-- `BACKUP_INTERVAL_SECONDS`: default 900 (15 minutes)
-- `BACKUP_KEEP`: number of backup metadata records kept in MongoDB (default 12)
-- `AUTO_RESTORE`: default `true`
+Start command:
 
-Owner commands in private chat:
-- `/backup` — create an immediate snapshot
-- `/backupstatus` — show backup health and latest snapshot
+```text
+python main.py
+```
 
-The bot also performs a best-effort final snapshot during a clean shutdown/redeploy.
+The included `render.yaml` configures the web health endpoint.
 
-Keep the backup chat private and give the bot permission to send documents. Backups are compressed and SHA-256 verified before automatic restore.
+## Safety / game design
+
+PvP is fictional in-game combat. It uses bounded virtual coin/loot stakes only; there are no real-money wagers. The goal is high-stakes competition without making real-world harm or gambling part of the game.

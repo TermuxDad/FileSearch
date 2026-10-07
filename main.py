@@ -12,6 +12,7 @@ from bot.config import Config
 from bot.database.db import Database
 from bot.backup import BackupManager
 from bot.handlers import register_handlers
+from bot.game.pvp import restore_fights
 
 logging.basicConfig(
     level=logging.INFO,
@@ -63,6 +64,7 @@ async def main():
         restore_raids = getattr(app, "_zombie_restore_raids", None)
         if restore_raids:
             await restore_raids()
+        await restore_fights(app, db)
         me = await app.get_me()
         log.info("Bot started: @%s", me.username)
         await asyncio.Event().wait()
