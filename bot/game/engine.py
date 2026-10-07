@@ -75,9 +75,22 @@ def regen_energy(player):
     last = player.get("last_energy")
     if not last:
         return 0
+
     now = datetime.now(timezone.utc)
+
+    if last.tzinfo is None:
+        last = last.replace(tzinfo=timezone.utc)
+    else:
+        last = last.astimezone(timezone.utc)
+
     elapsed = int((now - last).total_seconds() // 300)
+
     if elapsed <= 0:
         return 0
-    gain = min(elapsed * 5, player["max_energy"] - player["energy"])
+
+    gain = min(
+        elapsed * 5,
+        player["max_energy"] - player["energy"]
+    )
+
     return max(0, gain)
