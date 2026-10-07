@@ -88,6 +88,12 @@ LOCATIONS = [
     ("🏰", "Zombie Fortress", 35, 15),
 ]
 
+SPECIALS = {
+    "adrenaline": ("💉 Adrenaline", 500),
+    "smoke": ("💨 Smoke Bomb", 700),
+    "rage": ("🩸 Rage Serum", 1200),
+}
+
 def weapon_attack(key):
     return WEAPONS.get(key, WEAPONS["rusty_knife"])[1]
 
