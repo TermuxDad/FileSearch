@@ -1,6 +1,7 @@
 from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from pyrogram.enums import ButtonStyle
+from pyrogram.errors import MessageNotModified
 import config
 from Client.premium import premium_emoji
 
@@ -46,7 +47,10 @@ async def start_callbacks(client, query):
     else:
         text = "<b>Wᴇʟᴄᴏᴍᴇ Tᴏ Vᴇʏʀᴏ.</b>\n\nCʜᴏᴏꜱᴇ Aɴ Oᴘᴛɪᴏɴ Bᴇʟᴏᴡ."
     await query.answer()
-    await query.message.edit_text(text, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Bᴀᴄᴋ", callback_data="v_home", style=ButtonStyle.PRIMARY)]]))
+    try:
+        await query.message.edit_text(text, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Bᴀᴄᴋ", callback_data="v_home", style=ButtonStyle.PRIMARY)]]))
+    except MessageNotModified:
+        pass
 
 @Client.on_message(filters.text & filters.regex(r"^/help(?:@[A-Za-z0-9_]+)?(?:\s|$)"))
 async def help_command(client, message):
@@ -64,4 +68,7 @@ async def help_command(client, message):
 @Client.on_callback_query(filters.regex(r"^v_home$"))
 async def back(client, query):
     await query.answer()
-    await query.message.edit_text("<b>Wᴇʟᴄᴏᴍᴇ Tᴏ Vᴇʏʀᴏ.</b>\n\nCʜᴏᴏꜱᴇ Aɴ Oᴘᴛɪᴏɴ Bᴇʟᴏᴡ.", reply_markup=kb())
+    try:
+        await query.message.edit_text("<b>Wᴇʟᴄᴏᴍᴇ Tᴏ Vᴇʏʀᴏ.</b>\n\nCʜᴏᴏꜱᴇ Aɴ Oᴘᴛɪᴏɴ Bᴇʟᴏᴡ.", reply_markup=kb())
+    except MessageNotModified:
+        pass
