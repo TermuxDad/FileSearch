@@ -19,4 +19,4 @@ def register(app, db):
             f"⭐ Level: <b>{p['level']}</b>\n\n"
             "Choose an action below."
         )
-        await message.reply_text(text, reply_markup=home_kb(), disable_web_page_preview=True)
+        await message.reply_text(text, reply_markup=home_kb())
