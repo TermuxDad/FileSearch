@@ -46,7 +46,7 @@ async def whisper_inline(client, query):
         title="Sᴇᴄʀᴇᴛ Wʜɪꜱᴘᴇʀ",
         description=f"Sᴇɴᴅ Tᴏ {target.first_name or target.username or target.id}",
         input_message_content=InputTextMessageContent(
-            f"<b>Wʜɪꜱᴘᴇʀ Sᴇɴᴛ Tᴏ {mention}.</b>\n\n"
+            f"<b>A Wʜɪꜱᴘᴇʀ Hᴀꜱ Bᴇᴇɴ Sᴇɴᴛ Tᴏ {mention}.</b>\n\n"
             "<b>Oɴʟʏ Tʜᴇ Tᴀʀɢᴇᴛ Uꜱᴇʀ Cᴀɴ Oᴘᴇɴ Iᴛ.</b>"
         ),
         reply_markup=InlineKeyboardMarkup([[
