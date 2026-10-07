@@ -32,7 +32,7 @@ async def start(client, message):
         f"{premium_emoji('help','📝')} Nᴏᴛᴇꜱ & Aᴅᴍɪɴ Pᴏᴡᴇʀꜱ\n\n"
         "Cʜᴏᴏꜱᴇ Aɴ Oᴘᴛɪᴏɴ Bᴇʟᴏᴡ."
     )
-    await message.reply_text(text, reply_markup=kb(), disable_web_page_preview=True)
+    await message.reply_text(text, reply_markup=kb())
 
 @Client.on_callback_query(filters.regex(r"^v_"))
 async def start_callbacks(client, query):
@@ -59,7 +59,7 @@ async def help_command(client, message):
         "<b>Oᴡɴᴇʀ</b>\n<code>/broadcast /stats /update</code>\n\n"
         f"<b>Wʜɪꜱᴘᴇʀ</b>\nUꜱᴇ Vᴇʏʀᴏ Iɴ Tᴇʟᴇɢʀᴀᴍ Iɴʟɪɴᴇ Mᴏᴅᴇ: <code>@{config.BOT_USERNAME or 'VeyroBot'} @username message</code>."
     )
-    await message.reply_text(text, disable_web_page_preview=True)
+    await message.reply_text(text)
 
 @Client.on_callback_query(filters.regex(r"^v_home$"))
 async def back(client, query):
