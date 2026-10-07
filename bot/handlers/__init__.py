@@ -1,5 +1,5 @@
 from .start import register
-from .game import register_game
+from .game import register as register_game
 from .profile import register_profile
 from .shop import register_shop
 from .missions import register_missions
