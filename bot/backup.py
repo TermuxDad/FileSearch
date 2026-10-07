@@ -15,7 +15,7 @@ from bson import json_util
 
 log = logging.getLogger("zombie_survival.backup")
 
-BACKUP_COLLECTIONS = ("players", "missions", "raids", "combats")
+BACKUP_COLLECTIONS = ("players", "missions", "raids", "combats", "pvp_challenges", "pvp_fights", "clans", "clan_wars", "territories", "event_claims", "rivalries")
 
 
 class BackupManager:
@@ -97,8 +97,11 @@ class BackupManager:
                     f"• SHA-256: <code>{digest}</code>\n"
                     f"• UTC: <code>{payload['created_at']}</code>"
                 )
+                chat_id = self.chat_id
+                if isinstance(chat_id, str) and chat_id.lstrip("-").isdigit():
+                    chat_id = int(chat_id)
                 msg = await self.app.send_document(
-                    chat_id=self.chat_id,
+                    chat_id=chat_id,
                     document=str(temp_path),
                     file_name=filename,
                     caption=caption,
