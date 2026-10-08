@@ -5,6 +5,8 @@ from pyrogram.errors import MessageNotModified
 import config
 from Client.premium import premium_emoji
 
+START_IMAGE = "https://graph.org/file/561e78c3cea6f4ddba6c3-8a76966417c17d34db.jpg"
+
 def kb():
     username = config.BOT_USERNAME or "VeyroBot"
     return InlineKeyboardMarkup([
@@ -66,19 +68,22 @@ def back_kb():
         [InlineKeyboardButton("Bᴀᴄᴋ", callback_data="v_home", style=ButtonStyle.PRIMARY)]
     ])
 
+async def send_start(client, chat_id):
+    await client.send_photo(chat_id, START_IMAGE, caption=start_text(), reply_markup=kb())
+
 @Client.on_message(filters.text & filters.regex(r"^/start(?:@[A-Za-z0-9_]+)?(?:\s|$)"))
 async def start(client, message):
     if message.from_user:
         await client.db.register_user(message.from_user.id)
     if message.chat.type.name in ("GROUP", "SUPERGROUP"):
         await client.db.register_group(message.chat.id, message.chat.title or "")
-    await message.reply_text(start_text(), reply_markup=kb())
+    await send_start(client, message.chat.id)
 
 @Client.on_callback_query(filters.regex(r"^v_help$"))
 async def help_callback(client, query):
     await query.answer()
     try:
-        await query.message.edit_text(help_text(), reply_markup=back_kb())
+        await query.message.edit_caption(caption=help_text(), reply_markup=back_kb())
     except MessageNotModified:
         pass
 
@@ -86,8 +91,8 @@ async def help_callback(client, query):
 async def features_callback(client, query):
     await query.answer()
     try:
-        await query.message.edit_text(
-            "<b>Fᴇᴀᴛᴜʀᴇꜱ</b>\n\nWʜɪꜱᴘᴇʀꜱ • Tᴀɢɢɪɴɢ • Mᴏᴅᴇʀᴀᴛɪᴏɴ • Nᴏᴛᴇꜱ • Aᴅᴍɪɴ Pᴏᴡᴇʀꜱ.",
+        await query.message.edit_caption(
+            caption="<b>Fᴇᴀᴛᴜʀᴇꜱ</b>\n\nWʜɪꜱᴘᴇʀꜱ • Tᴀɢɢɪɴɢ • Mᴏᴅᴇʀᴀᴛɪᴏɴ • Nᴏᴛᴇꜱ • Aᴅᴍɪɴ Pᴏᴡᴇʀꜱ.",
             reply_markup=back_kb()
         )
     except MessageNotModified:
@@ -97,8 +102,8 @@ async def features_callback(client, query):
 async def about_callback(client, query):
     await query.answer()
     try:
-        await query.message.edit_text(
-            "<b>Aʙᴏᴜᴛ Vᴇʏʀᴏ</b>\n\nA Pʀᴏꜰᴇꜱꜱɪᴏɴᴀʟ Gʀᴏᴜᴘ Mᴀɴᴀɢᴇᴍᴇɴᴛ Bᴏᴛ.",
+        await query.message.edit_caption(
+            caption="<b>Aʙᴏᴜᴛ Vᴇʏʀᴏ</b>\n\nA Pʀᴏꜰᴇꜱꜱɪᴏɴᴀʟ Gʀᴏᴜᴘ Mᴀɴᴀɢᴇᴍᴇɴᴛ Bᴏᴛ.",
             reply_markup=back_kb()
         )
     except MessageNotModified:
@@ -113,6 +118,6 @@ async def back(client, query):
     await query.answer()
     try:
         await query.message.delete()
-        await query.message.reply_text(start_text(), reply_markup=kb())
+        await send_start(client, query.message.chat.id)
     except Exception as e:
         print(f"BACK ERROR: {type(e).__name__}: {e}", flush=True)
