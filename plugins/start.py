@@ -48,7 +48,8 @@ def help_text():
         "<code>/broadcast</code> <code>/stats</code> <code>/update</code>\n\n"
         "<b>Wʜɪꜱᴘᴇʀ</b>\n"
         "Uꜱᴇ Vᴇʏʀᴏ Iɴ Tᴇʟᴇɢʀᴀᴍ Iɴʟɪɴᴇ Mᴏᴅᴇ:\n"
-        f"<code>@{config.BOT_USERNAME or 'VeyroBot'}</code> <code>@username</code> <code>message</code>"
+        f"<code>@{config.BOT_USERNAME or 'VeyroBot'}</code> <code>message</code>\n"
+        "Fɪʀꜱᴛ Tɪᴍᴇ, Cʜᴏᴏꜱᴇ Tʜᴇ Uꜱᴇʀ Fʀᴏᴍ Tʜᴇ Wʜɪꜱᴘᴇʀ Oᴘᴛɪᴏɴꜱ. Tʜᴇ Lᴀꜱᴛ Sᴇʟᴇᴄᴛᴇᴅ Uꜱᴇʀ Wɪʟʟ Bᴇ Sᴀᴠᴇᴅ Fᴏʀ Yᴏᴜ."
     )
 
 def back_kb():
