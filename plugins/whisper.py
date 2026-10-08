@@ -2,15 +2,15 @@ import uuid
 from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, InlineQueryResultArticle, InputTextMessageContent
 from pyrogram.enums import ButtonStyle
-from Client.premium import premium_emoji
 
 MAX_WHISPER_LENGTH = 180
+BUTTON_EMOJI_ID = "6271537028307881531"
 
 
 def safe_name(user):
-    name = user.first_name if hasattr(user, "first_name") else None
-    username = user.username if hasattr(user, "username") else None
-    user_id = user.id if hasattr(user, "id") else user
+    name = getattr(user, "first_name", None)
+    username = getattr(user, "username", None)
+    user_id = getattr(user, "id", user)
     return (name or username or str(user_id)).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
 
@@ -21,9 +21,10 @@ def mention(user_id, name):
 def whisper_button(whisper_id):
     return InlineKeyboardMarkup([[
         InlineKeyboardButton(
-            "🔐",
+            "Rᴇᴀᴅ Wʜɪꜱᴘᴇʀ",
             callback_data=f"whisper:{whisper_id}",
             style=ButtonStyle.PRIMARY,
+            icon_custom_emoji_id=BUTTON_EMOJI_ID,
         )
     ]])
 
@@ -71,7 +72,7 @@ async def whisper_inline(client, query):
     if not text:
         return
     parts = text.split(maxsplit=1)
-    saved = await client.db.get_whisper_target(sender_id)
+    saved_targets = await client.db.get_whisper_targets(sender_id, 10)
     target = None
     target_id = 0
     target_name = "Aɴʏᴏɴᴇ"
@@ -93,8 +94,9 @@ async def whisper_inline(client, query):
         explicit_target = True
         target_id = int(parts[0])
         message = parts[1].strip()
-        if saved and int(saved.get("target_id", 0)) == target_id:
-            target_name = saved.get("target_name") or str(target_id)
+        saved_match = next((item for item in saved_targets if int(item.get("target_id", 0)) == target_id), None)
+        if saved_match:
+            target_name = saved_match.get("target_name") or str(target_id)
         else:
             try:
                 target = await client.get_users(target_id)
@@ -120,7 +122,12 @@ async def whisper_inline(client, query):
                     "<b>Iɴᴠᴀʟɪᴅ Wʜɪꜱᴘᴇʀ! Pʟᴇᴀꜱᴇ Cʀᴇᴀᴛᴇ Aɴᴏᴛʜᴇʀ Oɴᴇ!</b>"
                 ),
             )])
-        await client.db.save_whisper_target(sender_id, target_id, target_name, getattr(target, "username", "") or "")
+        await client.db.save_whisper_target(
+            sender_id,
+            target_id,
+            target_name,
+            getattr(target, "username", "") if target else "",
+        )
         whisper_id = await create_whisper(client, sender_id, None, target_id, target_name, message)
         return await answer_results(query, [whisper_result(
             "Sᴇɴᴅ Wʜɪꜱᴘᴇʀ",
@@ -140,8 +147,10 @@ async def whisper_inline(client, query):
         0,
     ))
 
-    if saved and int(saved.get("target_id", 0)):
-        saved_id = int(saved["target_id"])
+    for saved in saved_targets:
+        saved_id = int(saved.get("target_id", 0))
+        if not saved_id:
+            continue
         saved_name = saved.get("target_name") or str(saved_id)
         whisper_id = await create_whisper(client, sender_id, None, saved_id, saved_name, message)
         results.append(whisper_result(
@@ -170,7 +179,7 @@ async def whisper_callback(client, query):
     if not updated:
         return await query.answer("Tʜɪꜱ Wʜɪꜱᴘᴇʀ Hᴀꜱ Aʟʀᴇᴀᴅʏ Bᴇᴇɴ Rᴇᴀᴅ.", show_alert=True)
     await query.answer(item["message"], show_alert=True)
-    reader = safe_name(query.from_user)
+    reader = mention(query.from_user.id, safe_name(query.from_user))
     read_text = f"<b>{reader} Rᴇᴀᴅ Tʜᴇ Wʜɪꜱᴘᴇʀ.</b>"
     try:
         if query.inline_message_id:
