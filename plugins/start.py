@@ -10,25 +10,20 @@ START_IMAGE = "https://graph.org/file/561e78c3cea6f4ddba6c3-8a76966417c17d34db.j
 def kb():
     username = config.BOT_USERNAME or "VeyroBot"
     return InlineKeyboardMarkup([
+        [InlineKeyboardButton("Sᴜᴍᴍᴏɴ Mᴇ", url=f"https://t.me/{username}?startgroup=true", style=ButtonStyle.DANGER)],
         [
-            InlineKeyboardButton("Hᴇʟᴘ", callback_data="v_help", style=ButtonStyle.PRIMARY),
-            InlineKeyboardButton("Fᴇᴀᴛᴜʀᴇꜱ", callback_data="v_features", style=ButtonStyle.PRIMARY)
+            InlineKeyboardButton("Sᴜᴘᴘᴏʀᴛ", url="https://t.me/ArchonCare", style=ButtonStyle.PRIMARY),
+            InlineKeyboardButton("Uᴘᴅᴀᴛᴇ", url="https://t.me/ArchonNetwork", style=ButtonStyle.PRIMARY)
         ],
-        [
-            InlineKeyboardButton("Aᴅᴅ Tᴏ Gʀᴏᴜᴘ", url=f"https://t.me/{username}?startgroup=true", style=ButtonStyle.SUCCESS),
-            InlineKeyboardButton("Aʙᴏᴜᴛ", callback_data="v_about", style=ButtonStyle.PRIMARY)
-        ]
+        [InlineKeyboardButton("Hᴇʟᴘ Cᴇɴᴛᴇʀ", callback_data="v_help", style=ButtonStyle.SUCCESS)]
     ])
 
-def start_text():
+def start_text(name="User"):
     return (
-        f"{premium_emoji('home','👋')} <b>Wᴇʟᴄᴏᴍᴇ Tᴏ Vᴇʏʀᴏ.</b>\n\n"
-        "<b>Yᴏᴜʀ Aʟʟ-Iɴ-Oɴᴇ Tᴇʟᴇɢʀᴀᴍ Gʀᴏᴜᴘ Aꜱꜱɪꜱᴛᴀɴᴛ.</b>\n\n"
-        f"{premium_emoji('settings','⚙️')} Gʀᴏᴜᴘ Mᴀɴᴀɢᴇᴍᴇɴᴛ\n"
-        f"{premium_emoji('home','👥')} Tᴀɢɢɪɴɢ & Mᴇɴᴛɪᴏɴꜱ\n"
-        f"{premium_emoji('lock','🔐')} Pʀɪᴠᴀᴛᴇ Wʜɪꜱᴘᴇʀꜱ\n"
-        f"{premium_emoji('help','📝')} Nᴏᴛᴇꜱ & Aᴅᴍɪɴ Pᴏᴡᴇʀꜱ\n\n"
-        "Cʜᴏᴏꜱᴇ Aɴ Oᴘᴛɪᴏɴ Bᴇʟᴏᴡ."
+        f"<b>Wᴇʟᴄᴏᴍᴇ, {name}!</b> <tg-emoji emoji-id='5413694143601842851'>👋</tg-emoji>\n\n"
+        "Tʜɪꜱ Iꜱ Vᴇʏʀᴏ — A Pʀᴏғᴇꜱꜱɪᴏɴᴀʟ Tᴇʟᴇɢʀᴀᴍ Aꜱꜱɪꜱᴛᴀɴᴛ.\n\n"
+        "<i>Eʟᴇɢᴀɴᴛ. Fᴀꜱᴛ. Rᴇʟɪᴀʙʟᴇ.\n"
+        "Eᴠᴇʀʏᴛʜɪɴɢ Iꜱ Jᴜꜱᴛ A Tᴀᴘ Aᴡᴀʏ.</i>"
     )
 
 def help_text():
@@ -58,7 +53,9 @@ def back_kb():
     ])
 
 async def send_start(client, chat_id):
-    await client.send_photo(chat_id, START_IMAGE, caption=start_text(), reply_markup=kb())
+    user = await client.get_users(chat_id)
+    name = user.first_name or "User"
+    await client.send_photo(chat_id, START_IMAGE, caption=start_text(name), reply_markup=kb())
 
 @Client.on_message(filters.text & filters.regex(r"^/start(?:@[A-Za-z0-9_]+)?(?:\s|$)"))
 async def start(client, message):
