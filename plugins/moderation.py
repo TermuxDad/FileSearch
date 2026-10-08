@@ -5,10 +5,7 @@ from pyrogram.types import ChatPermissions, ChatPrivileges
 from Client.helpers import resolve_user, parse_duration, require_power, command_match, mention, safe_delete, bot_can, POWER_NAMES
 
 async def action_ok(client, message, command):
-    return bool(
-        message.chat and message.chat.type in (ChatType.GROUP, ChatType.SUPERGROUP)
-        and await require_power(client, message, command)
-    )
+    return bool(message.chat and message.chat.type in (ChatType.GROUP, ChatType.SUPERGROUP) and await require_power(client, message, command))
 
 async def punish(client, message, mode, silent=False, delete=False):
     cmd = command_match(message.text).group(1).lower()
@@ -23,8 +20,7 @@ async def punish(client, message, mode, silent=False, delete=False):
     duration = parse_duration(parts[2]) if len(parts) > 2 else None
     if len(parts) > 2 and parts[2].lower() not in ("0", "forever", "permanent", "perm") and duration is None:
         return await message.reply_text("<b>Iɴᴠᴀʟɪᴅ Dᴜʀᴀᴛɪᴏɴ.</b> Uꜱᴇ 30m, 2h, 1d, Eᴛᴄ.")
-    required = "can_restrict_members"
-    if not await bot_can(client, message.chat.id, required):
+    if not await bot_can(client, message.chat.id, "can_restrict_members"):
         return await message.reply_text("<b>Vᴇʏʀᴏ Nᴇᴇᴅꜱ Pᴇʀᴍɪꜱꜱɪᴏɴ Tᴏ Pᴇʀꜰᴏʀᴍ Tʜɪꜱ Aᴄᴛɪᴏɴ.</b>")
     try:
         if mode == "mute":
@@ -125,7 +121,7 @@ async def admin_tools(client, message):
         for user_id in await client.db.get_promoted_admins(message.chat.id):
             try:
                 member = await client.get_chat_member(message.chat.id, user_id)
-                if member.status == ChatMemberStatus.ADMINISTRATOR:
+                if member.status == ChatMemberStatus.ADMINISTRATOR and member.can_be_edited:
                     await client.promote_chat_member(message.chat.id, user_id, privileges=ChatPrivileges())
                     count += 1
                 await client.db.clear_promoted(message.chat.id, user_id)
@@ -137,15 +133,20 @@ async def admin_tools(client, message):
     if not user:
         return await message.reply_text("<b>Uꜱᴇ A Rᴇᴘʟʏ, Uꜱᴇʀɴᴀᴍᴇ Oʀ Uꜱᴇʀ ID.</b>")
     try:
+        member = await client.get_chat_member(message.chat.id, user.id)
         if cmd == "demote":
+            if member.status != ChatMemberStatus.ADMINISTRATOR:
+                return await message.reply_text("<b>Tʜɪꜱ Uꜱᴇʀ Iꜱ Nᴏᴛ Aɴ Aᴅᴍɪɴ.</b>")
+            if not member.can_be_edited:
+                return await message.reply_text("<b>Vᴇʏʀᴏ Cᴀɴɴᴏᴛ Dᴇᴍᴏᴛᴇ Tʜɪꜱ Aᴅᴍɪɴ.</b>")
             await client.promote_chat_member(message.chat.id, user.id, privileges=ChatPrivileges())
             await client.db.clear_promoted(message.chat.id, user.id)
         elif cmd == "title":
             if len(parts) < 3:
                 return await message.reply_text("<b>Uꜱᴇ /title &lt;user&gt; &lt;title&gt;.</b>")
-            member = await client.get_chat_member(message.chat.id, user.id)
-            privileges = member.privileges or ChatPrivileges()
-            await client.promote_chat_member(message.chat.id, user.id, privileges=privileges, custom_title=parts[2][:16])
+            if member.status != ChatMemberStatus.ADMINISTRATOR:
+                return await message.reply_text("<b>Tʜɪꜱ Uꜱᴇʀ Iꜱ Nᴏᴛ Aɴ Aᴅᴍɪɴ.</b>")
+            await client.set_administrator_title(message.chat.id, user.id, parts[2][:16])
         else:
             try:
                 level = int(parts[2]) if len(parts) > 2 else 0
