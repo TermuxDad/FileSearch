@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta, timezone
+import asyncio
 from pyrogram import Client, filters
 from pyrogram.enums import ChatMemberStatus, ChatType
 from pyrogram.types import ChatPermissions, ChatPrivileges
@@ -114,6 +115,23 @@ async def message_actions(client, message):
         print(f"MESSAGE ACTION ERROR: {type(e).__name__}: {e}", flush=True)
         await message.reply_text(f"<b>Aᴄᴛɪᴏɴ Fᴀɪʟᴇᴅ:</b> <code>{type(e).__name__}</code>")
 
+def demote_privileges():
+    return ChatPrivileges(
+        can_manage_chat=False,
+        can_delete_messages=False,
+        can_restrict_members=False,
+        can_invite_users=False,
+        can_pin_messages=False,
+        can_promote_members=False,
+        can_change_info=False,
+        can_manage_video_chats=False
+    )
+
+async def verify_demoted(client, chat_id, user_id):
+    await asyncio.sleep(0.7)
+    member = await client.get_chat_member(chat_id, user_id)
+    return member.status != ChatMemberStatus.ADMINISTRATOR
+
 @Client.on_message(filters.text & filters.regex(r"^/(promote|demote|demote_all|title)(?:@[A-Za-z0-9_]+)?(?:\s|$)"))
 async def admin_tools(client, message):
     cmd = command_match(message.text).group(1).lower()
@@ -123,16 +141,31 @@ async def admin_tools(client, message):
         return await message.reply_text("<b>Vᴇʏʀᴏ Nᴇᴇᴅꜱ Pʀᴏᴍᴏᴛᴇ Mᴇᴍʙᴇʀꜱ Pᴇʀᴍɪꜱꜱɪᴏɴ.</b>")
     if cmd == "demote_all":
         count = 0
+        failed = 0
         for user_id in await client.db.get_promoted_admins(message.chat.id):
             try:
                 member = await client.get_chat_member(message.chat.id, user_id)
-                if member.status == ChatMemberStatus.ADMINISTRATOR and member.can_be_edited:
-                    await client.promote_chat_member(message.chat.id, user_id, privileges=ChatPrivileges())
+                if member.status != ChatMemberStatus.ADMINISTRATOR:
+                    await client.db.clear_promoted(message.chat.id, user_id)
+                    continue
+                if not member.can_be_edited:
+                    failed += 1
+                    continue
+                await client.promote_chat_member(
+                    message.chat.id,
+                    user_id,
+                    privileges=demote_privileges()
+                )
+                if await verify_demoted(client, message.chat.id, user_id):
+                    await client.db.clear_promoted(message.chat.id, user_id)
                     count += 1
-                await client.db.clear_promoted(message.chat.id, user_id)
+                else:
+                    failed += 1
+                    print(f"DEMOTE ALL VERIFY FAILED: {user_id}", flush=True)
             except Exception as e:
+                failed += 1
                 print(f"DEMOTE ALL ERROR [{user_id}]: {type(e).__name__}: {e}", flush=True)
-        return await message.reply_text(f"<b>Dᴇᴍᴏᴛᴇᴅ:</b> {count}")
+        return await message.reply_text(f"<b>Dᴇᴍᴏᴛᴇᴅ: {count}\nFᴀɪʟᴇᴅ: {failed}</b>")
     parts = message.text.split(maxsplit=2)
     user = await resolve_user(client, message, parts[1] if len(parts) > 1 else None)
     if not user:
@@ -146,37 +179,60 @@ async def admin_tools(client, message):
                 return await message.reply_text("<b>Tʜɪꜱ Uꜱᴇʀ Iꜱ Nᴏᴛ Aɴ Aᴅᴍɪɴ.</b>")
             if not member.can_be_edited:
                 return await message.reply_text("<b>Vᴇʏʀᴏ Cᴀɴɴᴏᴛ Dᴇᴍᴏᴛᴇ Tʜɪꜱ Aᴅᴍɪɴ.</b>")
-            await client.promote_chat_member(message.chat.id, user.id, privileges=ChatPrivileges())
+            await client.promote_chat_member(
+                message.chat.id,
+                user.id,
+                privileges=demote_privileges()
+            )
+            if not await verify_demoted(client, message.chat.id, user.id):
+                return await message.reply_text("<b>Dᴇᴍᴏᴛᴇ Fᴀɪʟᴇᴅ: Uꜱᴇʀ Iꜱ Sᴛɪʟʟ Aɴ Aᴅᴍɪɴ.</b>")
             await client.db.clear_promoted(message.chat.id, user.id)
-        elif cmd == "title":
+            return await message.reply_text("<b>Dᴇᴍᴏᴛᴇ Cᴏᴍᴘʟᴇᴛᴇᴅ.</b>")
+        if cmd == "title":
             if len(parts) < 3:
                 return await message.reply_text("<b>Uꜱᴇ /title &lt;user&gt; &lt;title&gt;.</b>")
             if member.status != ChatMemberStatus.ADMINISTRATOR:
                 return await message.reply_text("<b>Tʜɪꜱ Uꜱᴇʀ Iꜱ Nᴏᴛ Aɴ Aᴅᴍɪɴ.</b>")
+            if not member.can_be_edited:
+                return await message.reply_text("<b>Vᴇʏʀᴏ Cᴀɴɴᴏᴛ Eᴅɪᴛ Tʜɪꜱ Aᴅᴍɪɴ.</b>")
             title = parts[2].strip()
             if not title:
                 return await message.reply_text("<b>Pʟᴇᴀꜱᴇ Pʀᴏᴠɪᴅᴇ A Vᴀʟɪᴅ Tɪᴛʟᴇ.</b>")
             await client.set_administrator_title(message.chat.id, user.id, title[:16])
-        else:
-            try:
-                level = int(parts[2]) if len(parts) > 2 else 0
-            except ValueError:
-                return await message.reply_text("<b>Lᴇᴠᴇʟ Mᴜꜱᴛ Bᴇ 0, 1, 2 Oʀ 3.</b>")
-            if level not in (0, 1, 2, 3):
-                return await message.reply_text("<b>Lᴇᴠᴇʟ Mᴜꜱᴛ Bᴇ 0, 1, 2 Oʀ 3.</b>")
-            base = dict(can_manage_chat=True, can_delete_messages=True, can_invite_users=True)
-            if level >= 1:
-                base["can_restrict_members"] = True
-            if level >= 2:
-                base.update(can_pin_messages=True, can_manage_video_chats=True)
-            if level >= 3:
-                base.update(can_change_info=True, can_promote_members=True)
-            await client.promote_chat_member(message.chat.id, user.id, privileges=ChatPrivileges(**base))
-            await client.db.mark_promoted(message.chat.id, user.id)
-        await message.reply_text("<b>Aᴅᴍɪɴ Aᴄᴛɪᴏɴ Cᴏᴍᴘʟᴇᴛᴇᴅ.</b>")
+            return await message.reply_text("<b>Aᴅᴍɪɴ Tɪᴛʟᴇ Uᴘᴅᴀᴛᴇᴅ.</b>")
+        try:
+            level = int(parts[2]) if len(parts) > 2 else 0
+        except ValueError:
+            return await message.reply_text("<b>Lᴇᴠᴇʟ Mᴜꜱᴛ Bᴇ 0, 1, 2 Oʀ 3.</b>")
+        if level not in (0, 1, 2, 3):
+            return await message.reply_text("<b>Lᴇᴠᴇʟ Mᴜꜱᴛ Bᴇ 0, 1, 2 Oʀ 3.</b>")
+        base = dict(
+            can_manage_chat=True,
+            can_delete_messages=True,
+            can_invite_users=True
+        )
+        if level >= 1:
+            base["can_restrict_members"] = True
+        if level >= 2:
+            base.update(
+                can_pin_messages=True,
+                can_manage_video_chats=True
+            )
+        if level >= 3:
+            base.update(
+                can_change_info=True,
+                can_promote_members=True
+            )
+        await client.promote_chat_member(
+            message.chat.id,
+            user.id,
+            privileges=ChatPrivileges(**base)
+        )
+        await client.db.mark_promoted(message.chat.id, user.id)
+        return await message.reply_text("<b>Aᴅᴍɪɴ Pʀᴏᴍᴏᴛᴇᴅ Cᴏᴍᴘʟᴇᴛᴇᴅ.</b>")
     except Exception as e:
         print(f"ADMIN ACTION ERROR [{cmd}]: {type(e).__name__}: {e}", flush=True)
-        await message.reply_text(f"<b>Aᴅᴍɪɴ Aᴄᴛɪᴏɴ Fᴀɪʟᴇᴅ:</b> <code>{type(e).__name__}</code>")
+        return await message.reply_text(f"<b>Aᴅᴍɪɴ Aᴄᴛɪᴏɴ Fᴀɪʟᴇᴅ:</b> <code>{type(e).__name__}</code>")
 
 @Client.on_message(filters.text & filters.regex(r"^/(add|remove|res)(?:@[A-Za-z0-9_]+)?(?:\s|$)"))
 async def powers(client, message):
