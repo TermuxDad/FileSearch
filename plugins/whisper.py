@@ -31,8 +31,9 @@ def whisper_button(whisper_id):
 
 def whisper_result(title, description, whisper_id, target_name, target_id):
     if target_id:
+        target_mention = mention(target_id, target_name)
         text = (
-            f"<b>A Wʜɪꜱᴘᴇʀ Mᴇꜱꜱᴀɢᴇ Tᴏ {target_name}.</b>\n"
+            f"<b>A Wʜɪꜱᴘᴇʀ Mᴇꜱꜱᴀɢᴇ Tᴏ {target_mention}.</b>\n"
             "<b>Oɴʟʏ Tʜᴇ Tᴀʀɢᴇᴛ Cᴀɴ Rᴇᴀᴅ Tʜᴇ Mᴇꜱꜱᴀɢᴇ.</b>"
         )
     else:
@@ -179,6 +180,16 @@ async def whisper_callback(client, query):
     if not updated:
         return await query.answer("Tʜɪꜱ Wʜɪꜱᴘᴇʀ Hᴀꜱ Aʟʀᴇᴀᴅʏ Bᴇᴇɴ Rᴇᴀᴅ.", show_alert=True)
     await query.answer(item["message"], show_alert=True)
+    if target_id:
+        try:
+            await client.db.update_whisper_target_identity(
+                item.get("sender_id"),
+                target_id,
+                safe_name(query.from_user),
+                getattr(query.from_user, "username", "") or "",
+            )
+        except Exception as e:
+            print(f"WHISPER TARGET UPDATE ERROR: {type(e).__name__}: {e}", flush=True)
     reader = mention(query.from_user.id, safe_name(query.from_user))
     read_text = f"<b>{reader} Rᴇᴀᴅ Tʜᴇ Wʜɪꜱᴘᴇʀ.</b>"
     try:
