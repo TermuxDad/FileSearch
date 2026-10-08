@@ -104,6 +104,21 @@ class Database:
             "updated_at": now,
         })
 
+    async def update_whisper_target_identity(self, sender_id, target_id, target_name=None, username=None):
+        target_id = int(target_id)
+        update = {}
+        if target_name:
+            update["target_name"] = target_name
+        if username is not None:
+            update["username"] = username or ""
+        if not update:
+            return
+        update["updated_at"] = datetime.now(timezone.utc)
+        await self.db.whisper_targets.update_one(
+            {"sender_id": sender_id, "target_id": target_id},
+            {"$set": update},
+        )
+
     async def get_whisper_targets(self, sender_id, limit=10):
         cursor = self.db.whisper_targets.find({"sender_id": sender_id}).sort("updated_at", -1).limit(limit)
         return [item async for item in cursor]
