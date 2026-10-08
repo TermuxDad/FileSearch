@@ -18,6 +18,17 @@ def kb():
         ]
     ])
 
+def start_text():
+    return (
+        f"{premium_emoji('home','👋')} <b>Wᴇʟᴄᴏᴍᴇ Tᴏ Vᴇʏʀᴏ.</b>\n\n"
+        "<b>Yᴏᴜʀ Aʟʟ-Iɴ-Oɴᴇ Tᴇʟᴇɢʀᴀᴍ Gʀᴏᴜᴘ Aꜱꜱɪꜱᴛᴀɴᴛ.</b>\n\n"
+        f"{premium_emoji('settings','⚙️')} Gʀᴏᴜᴘ Mᴀɴᴀɢᴇᴍᴇɴᴛ\n"
+        f"{premium_emoji('home','👥')} Tᴀɢɢɪɴɢ & Mᴇɴᴛɪᴏɴꜱ\n"
+        f"{premium_emoji('lock','🔐')} Pʀɪᴠᴀᴛᴇ Wʜɪꜱᴘᴇʀꜱ\n"
+        f"{premium_emoji('help','📝')} Nᴏᴛᴇꜱ & Aᴅᴍɪɴ Pᴏᴡᴇʀꜱ\n\n"
+        "Cʜᴏᴏꜱᴇ Aɴ Oᴘᴛɪᴏɴ Bᴇʟᴏᴡ."
+    )
+
 def help_text():
     return (
         "<b>Hᴇʟᴘ Cᴇɴᴛᴇʀ</b>\n\n"
@@ -32,22 +43,22 @@ def help_text():
         "<code>/pause</code> • Pᴀᴜꜱᴇ Tᴀɢɢɪɴɢ\n"
         "<code>/resume</code> • Rᴇꜱᴜᴍᴇ Tᴀɢɢɪɴɢ\n\n"
         "<b>Mᴏᴅᴇʀᴀᴛɪᴏɴ</b>\n"
-        "<code>/warn /unwarn /warns</code>\n"
-        "<code>/mute /unmute</code>\n"
-        "<code>/ban /unban /kick</code>\n"
-        "<code>/dmute /smute /dban /sban /skick</code>\n"
-        "<code>/pin /unpin /d</code>\n\n"
+        "<code>/warn</code> <code>/unwarn</code> <code>/warns</code>\n"
+        "<code>/mute</code> <code>/unmute</code>\n"
+        "<code>/ban</code> <code>/unban</code> <code>/kick</code>\n"
+        "<code>/dmute</code> <code>/smute</code> <code>/dban</code> <code>/sban</code> <code>/skick</code>\n"
+        "<code>/pin</code> <code>/unpin</code> <code>/d</code>\n\n"
         "<b>Aᴅᴍɪɴ</b>\n"
-        "<code>/res /add /remove</code>\n"
-        "<code>/promote /demote /demote_all</code>\n"
+        "<code>/res</code> <code>/add</code> <code>/remove</code>\n"
+        "<code>/promote</code> <code>/demote</code> <code>/demote_all</code>\n"
         "<code>/title</code>\n\n"
         "<b>Nᴏᴛᴇꜱ</b>\n"
-        "<code>/save /get /notes /delnote /clear_notes</code>\n\n"
+        "<code>/save</code> <code>/get</code> <code>/notes</code> <code>/delnote</code> <code>/clear_notes</code>\n\n"
         "<b>Oᴡɴᴇʀ</b>\n"
-        "<code>/broadcast /stats /update</code>\n\n"
-        f"<b>Wʜɪꜱᴘᴇʀ</b>\n"
-        f"Uꜱᴇ Vᴇʏʀᴏ Iɴ Tᴇʟᴇɢʀᴀᴍ Iɴʟɪɴᴇ Mᴏᴅᴇ:\n"
-        f"<code>@{config.BOT_USERNAME or 'VeyroBot'} @username message</code>"
+        "<code>/broadcast</code> <code>/stats</code> <code>/update</code>\n\n"
+        "<b>Wʜɪꜱᴘᴇʀ</b>\n"
+        "Uꜱᴇ Vᴇʏʀᴏ Iɴ Tᴇʟᴇɢʀᴀᴍ Iɴʟɪɴᴇ Mᴏᴅᴇ:\n"
+        f"<code>@{config.BOT_USERNAME or 'VeyroBot'}</code> <code>@username</code> <code>message</code>"
     )
 
 @Client.on_message(filters.text & filters.regex(r"^/start(?:@[A-Za-z0-9_]+)?(?:\s|$)"))
@@ -56,16 +67,7 @@ async def start(client, message):
         await client.db.register_user(message.from_user.id)
     if message.chat.type.name in ("GROUP", "SUPERGROUP"):
         await client.db.register_group(message.chat.id, message.chat.title or "")
-    text = (
-        f"{premium_emoji('home','👋')} <b>Wᴇʟᴄᴏᴍᴇ Tᴏ Vᴇʏʀᴏ.</b>\n\n"
-        "<b>Yᴏᴜʀ Aʟʟ-Iɴ-Oɴᴇ Tᴇʟᴇɢʀᴀᴍ Gʀᴏᴜᴘ Aꜱꜱɪꜱᴛᴀɴᴛ.</b>\n\n"
-        f"{premium_emoji('settings','⚙️')} Gʀᴏᴜᴘ Mᴀɴᴀɢᴇᴍᴇɴᴛ\n"
-        f"{premium_emoji('home','👥')} Tᴀɢɢɪɴɢ & Mᴇɴᴛɪᴏɴꜱ\n"
-        f"{premium_emoji('lock','🔐')} Pʀɪᴠᴀᴛᴇ Wʜɪꜱᴘᴇʀꜱ\n"
-        f"{premium_emoji('help','📝')} Nᴏᴛᴇꜱ & Aᴅᴍɪɴ Pᴏᴡᴇʀꜱ\n\n"
-        "Cʜᴏᴏꜱᴇ Aɴ Oᴘᴛɪᴏɴ Bᴇʟᴏᴡ."
-    )
-    await message.reply_text(text, reply_markup=kb())
+    await message.reply_text(start_text(), reply_markup=kb())
 
 @Client.on_callback_query(filters.regex(r"^v_"))
 async def start_callbacks(client, query):
@@ -77,23 +79,31 @@ async def start_callbacks(client, query):
     elif action == "v_about":
         text = "<b>Aʙᴏᴜᴛ Vᴇʏʀᴏ</b>\n\nA Pʀᴏꜰᴇꜱꜱɪᴏɴᴀʟ Gʀᴏᴜᴘ Mᴀɴᴀɢᴇᴍᴇɴᴛ Bᴏᴛ."
     else:
-        text = "<b>Wᴇʟᴄᴏᴍᴇ Tᴏ Vᴇʏʀᴏ.</b>\n\nCʜᴏᴏꜱᴇ Aɴ Oᴘᴛɪᴏɴ Bᴇʟᴏᴡ."
+        text = start_text()
     await query.answer()
     try:
-        await query.message.edit_text(text, reply_markup=InlineKeyboardMarkup([
-            [InlineKeyboardButton("Bᴀᴄᴋ", callback_data="v_home", style=ButtonStyle.PRIMARY)]
-        ]))
+        await query.message.edit_text(
+            text,
+            reply_markup=InlineKeyboardMarkup([
+                [InlineKeyboardButton("Bᴀᴄᴋ", callback_data="v_home", style=ButtonStyle.PRIMARY)]
+            ])
+        )
     except MessageNotModified:
         pass
 
 @Client.on_message(filters.text & filters.regex(r"^/help(?:@[A-Za-z0-9_]+)?(?:\s|$)"))
 async def help_command(client, message):
-    await message.reply_text(help_text())
+    await message.reply_text(
+        help_text(),
+        reply_markup=InlineKeyboardMarkup([
+            [InlineKeyboardButton("Bᴀᴄᴋ", callback_data="v_home", style=ButtonStyle.PRIMARY)]
+        ])
+    )
 
 @Client.on_callback_query(filters.regex(r"^v_home$"))
 async def back(client, query):
     await query.answer()
     try:
-        await query.message.edit_text("<b>Wᴇʟᴄᴏᴍᴇ Tᴏ Vᴇʏʀᴏ.</b>\n\nCʜᴏᴏꜱᴇ Aɴ Oᴘᴛɪᴏɴ Bᴇʟᴏᴡ.", reply_markup=kb())
+        await query.message.edit_text(start_text(), reply_markup=kb())
     except MessageNotModified:
         pass
