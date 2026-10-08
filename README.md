@@ -25,15 +25,6 @@ Set the required environment variables from `.env.example`. MongoDB must be exte
 ### Tagging
 `/gmtag` `/gntag` `/tagall` `/vctag` `/admin` `/all` `/stop` `/pause` `/resume`
 
-### Moderation
-`/warn` `/unwarn` `/warns` `/mute` `/unmute` `/ban` `/unban` `/kick` `/dmute` `/smute` `/dban` `/sban` `/skick` `/pin` `/unpin` `/d`
-
-### Admin
-`/res` `/add` `/remove` `/promote` `/demote` `/demote_all` `/title`
-
-### Notes
-`/save` `/get` `/notes` `/delnote` `/clear_notes`
-
 ### Owner
 `/broadcast` `/stats` `/update`
 
