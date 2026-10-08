@@ -10,7 +10,19 @@ class Database:
         await self.db.users.create_index("user_id", unique=True)
         await self.db.groups.create_index("chat_id", unique=True)
         await self.db.whispers.create_index("expires_at", expireAfterSeconds=0)
-        await self.db.whisper_targets.create_index("sender_id", unique=True)
+        try:
+            await self.db.whisper_targets.drop_index("sender_id_1")
+        except Exception:
+            pass
+        await self.db.whisper_targets.create_index(
+            [("sender_id", 1), ("target_id", 1)],
+            unique=True,
+            name="sender_target_unique",
+        )
+        await self.db.whisper_targets.create_index(
+            [("sender_id", 1), ("updated_at", -1)],
+            name="sender_updated",
+        )
 
     async def ping(self):
         await self.client.admin.command("ping")
@@ -67,14 +79,38 @@ class Database:
         )
 
     async def save_whisper_target(self, sender_id, target_id, target_name="", username=""):
-        await self.db.whisper_targets.update_one(
-            {"sender_id": sender_id},
-            {"$set": {"target_id": target_id, "target_name": target_name, "username": username, "updated_at": datetime.now(timezone.utc)}},
-            upsert=True,
-        )
+        now = datetime.now(timezone.utc)
+        target_id = int(target_id)
+        existing = await self.db.whisper_targets.find_one({"sender_id": sender_id, "target_id": target_id})
+        if existing:
+            await self.db.whisper_targets.update_one(
+                {"_id": existing["_id"]},
+                {"$set": {"target_name": target_name or existing.get("target_name", str(target_id)), "username": username, "updated_at": now}},
+            )
+            return
+        count = await self.db.whisper_targets.count_documents({"sender_id": sender_id})
+        if count >= 10:
+            oldest = await self.db.whisper_targets.find_one(
+                {"sender_id": sender_id},
+                sort=[("updated_at", 1), ("_id", 1)],
+            )
+            if oldest:
+                await self.db.whisper_targets.delete_one({"_id": oldest["_id"]})
+        await self.db.whisper_targets.insert_one({
+            "sender_id": sender_id,
+            "target_id": target_id,
+            "target_name": target_name or str(target_id),
+            "username": username,
+            "updated_at": now,
+        })
+
+    async def get_whisper_targets(self, sender_id, limit=10):
+        cursor = self.db.whisper_targets.find({"sender_id": sender_id}).sort("updated_at", -1).limit(limit)
+        return [item async for item in cursor]
 
     async def get_whisper_target(self, sender_id):
-        return await self.db.whisper_targets.find_one({"sender_id": sender_id})
+        targets = await self.get_whisper_targets(sender_id, 1)
+        return targets[0] if targets else None
 
     async def inc_stat(self, key, amount=1):
         await self.db.stats.update_one({"_id": key}, {"$inc": {"value": amount}}, upsert=True)
