@@ -37,6 +37,7 @@ async def punish(client, message, mode, silent=False, delete=False):
             result = "Mᴜᴛᴇᴅ" if mode == "mute" else "Bᴀɴɴᴇᴅ" if mode == "ban" else "Kɪᴄᴋᴇᴅ"
             await message.reply_text(f"<b>{result}:</b> {mention(user)}")
     except Exception as e:
+        print(f"PUNISH ERROR: {type(e).__name__}: {e}", flush=True)
         await message.reply_text(f"<b>Aᴄᴛɪᴏɴ Fᴀɪʟᴇᴅ:</b> <code>{type(e).__name__}</code>")
 
 @Client.on_message(filters.text & filters.regex(r"^/(mute|dmute|smute|ban|dban|sban|kick|skick)(?:@[A-Za-z0-9_]+)?(?:\s|$)"))
@@ -64,6 +65,7 @@ async def unpunish(client, message):
             await client.unban_chat_member(message.chat.id, user.id)
         await message.reply_text(f"<b>{'Uɴᴍᴜᴛᴇᴅ' if cmd == 'unmute' else 'Uɴʙᴀɴɴᴇᴅ'}:</b> {mention(user)}")
     except Exception as e:
+        print(f"UNPUNISH ERROR: {type(e).__name__}: {e}", flush=True)
         await message.reply_text(f"<b>Aᴄᴛɪᴏɴ Fᴀɪʟᴇᴅ:</b> <code>{type(e).__name__}</code>")
 
 @Client.on_message(filters.text & filters.regex(r"^/(warn|unwarn|warns)(?:@[A-Za-z0-9_]+)?(?:\s|$)"))
@@ -109,6 +111,7 @@ async def message_actions(client, message):
             return
         await message.reply_text("<b>Aᴄᴛɪᴏɴ Cᴏᴍᴘʟᴇᴛᴇᴅ.</b>")
     except Exception as e:
+        print(f"MESSAGE ACTION ERROR: {type(e).__name__}: {e}", flush=True)
         await message.reply_text(f"<b>Aᴄᴛɪᴏɴ Fᴀɪʟᴇᴅ:</b> <code>{type(e).__name__}</code>")
 
 @Client.on_message(filters.text & filters.regex(r"^/(promote|demote|demote_all|title)(?:@[A-Za-z0-9_]+)?(?:\s|$)"))
@@ -116,6 +119,8 @@ async def admin_tools(client, message):
     cmd = command_match(message.text).group(1).lower()
     if not await action_ok(client, message, cmd):
         return
+    if not await bot_can(client, message.chat.id, "can_promote_members"):
+        return await message.reply_text("<b>Vᴇʏʀᴏ Nᴇᴇᴅꜱ Pʀᴏᴍᴏᴛᴇ Mᴇᴍʙᴇʀꜱ Pᴇʀᴍɪꜱꜱɪᴏɴ.</b>")
     if cmd == "demote_all":
         count = 0
         for user_id in await client.db.get_promoted_admins(message.chat.id):
@@ -125,13 +130,15 @@ async def admin_tools(client, message):
                     await client.promote_chat_member(message.chat.id, user_id, privileges=ChatPrivileges())
                     count += 1
                 await client.db.clear_promoted(message.chat.id, user_id)
-            except Exception:
-                pass
+            except Exception as e:
+                print(f"DEMOTE ALL ERROR [{user_id}]: {type(e).__name__}: {e}", flush=True)
         return await message.reply_text(f"<b>Dᴇᴍᴏᴛᴇᴅ:</b> {count}")
     parts = message.text.split(maxsplit=2)
     user = await resolve_user(client, message, parts[1] if len(parts) > 1 else None)
     if not user:
         return await message.reply_text("<b>Uꜱᴇ A Rᴇᴘʟʏ, Uꜱᴇʀɴᴀᴍᴇ Oʀ Uꜱᴇʀ ID.</b>")
+    if user.id == message.from_user.id:
+        return await message.reply_text("<b>Yᴏᴜ Cᴀɴɴᴏᴛ Pᴇʀғᴏʀᴍ Tʜɪꜱ Aᴄᴛɪᴏɴ Oɴ Yᴏᴜʀꜱᴇʟғ.</b>")
     try:
         member = await client.get_chat_member(message.chat.id, user.id)
         if cmd == "demote":
@@ -146,7 +153,10 @@ async def admin_tools(client, message):
                 return await message.reply_text("<b>Uꜱᴇ /title &lt;user&gt; &lt;title&gt;.</b>")
             if member.status != ChatMemberStatus.ADMINISTRATOR:
                 return await message.reply_text("<b>Tʜɪꜱ Uꜱᴇʀ Iꜱ Nᴏᴛ Aɴ Aᴅᴍɪɴ.</b>")
-            await client.set_administrator_title(message.chat.id, user.id, parts[2][:16])
+            title = parts[2].strip()
+            if not title:
+                return await message.reply_text("<b>Pʟᴇᴀꜱᴇ Pʀᴏᴠɪᴅᴇ A Vᴀʟɪᴅ Tɪᴛʟᴇ.</b>")
+            await client.set_administrator_title(message.chat.id, user.id, title[:16])
         else:
             try:
                 level = int(parts[2]) if len(parts) > 2 else 0
@@ -165,6 +175,7 @@ async def admin_tools(client, message):
             await client.db.mark_promoted(message.chat.id, user.id)
         await message.reply_text("<b>Aᴅᴍɪɴ Aᴄᴛɪᴏɴ Cᴏᴍᴘʟᴇᴛᴇᴅ.</b>")
     except Exception as e:
+        print(f"ADMIN ACTION ERROR [{cmd}]: {type(e).__name__}: {e}", flush=True)
         await message.reply_text(f"<b>Aᴅᴍɪɴ Aᴄᴛɪᴏɴ Fᴀɪʟᴇᴅ:</b> <code>{type(e).__name__}</code>")
 
 @Client.on_message(filters.text & filters.regex(r"^/(add|remove|res)(?:@[A-Za-z0-9_]+)?(?:\s|$)"))
